@@ -7,7 +7,7 @@ from dotenv import dotenv_values, load_dotenv
 app = FastAPI()
 load_dotenv()
 
-API_KEY = os.get_env("API_KEY")
+API_KEY = os.getenv("API_KEY")
 
 
 class Query(BaseModel):
