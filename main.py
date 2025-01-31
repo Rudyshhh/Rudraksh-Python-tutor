@@ -18,7 +18,7 @@ class Query(BaseModel):
 @app.post("/ask")
 async def ask_ai(query: Query):
     global API_KEY
-    key = Query.api_key if Query.api_key else API_KEY
+    key = query.api_key if query.api_key else API_KEY
     if not key:
         raise HTTPException(status_code=400, detail="Api Key is Required.")
 
