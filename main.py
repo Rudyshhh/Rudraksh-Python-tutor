@@ -41,6 +41,54 @@
 #         raise HTTPException(status_code=500, detail=str(e))
 
 
+# from fastapi import FastAPI, HTTPException
+# from pydantic import BaseModel
+# import google.generativeai as genai
+# import os
+# from dotenv import load_dotenv
+# from fastapi.middleware.cors import CORSMiddleware
+
+# app = FastAPI()
+# load_dotenv()
+
+# API_KEY = os.getenv("API_KEY")
+
+# # Middleware for CORS to allow frontend interaction
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+
+# # Store chat history
+# chat_history = []
+
+# class Query(BaseModel):
+#     message: str
+#     api_key: str = ""
+
+# @app.post("/ask")
+# async def ask_ai(query: Query):
+#     global API_KEY
+#     key = query.api_key if query.api_key else API_KEY
+#     if not key:
+#         raise HTTPException(status_code=400, detail="API Key is Required.")
+
+#     try:
+#         genai.configure(api_key=key)
+#         model = genai.GenerativeModel("gemini-pro")
+#         response = model.generate_content(query.message)
+
+#         # Add query and response to chat history
+#         chat_history.append({"role": "user", "message": query.message})
+#         chat_history.append({"role": "ai", "message": response.text})
+
+#         return {"reply": response.text, "chat_history": chat_history}
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import google.generativeai as genai
@@ -65,6 +113,9 @@ app.add_middleware(
 # Store chat history
 chat_history = []
 
+# Initial welcome message to introduce the Python tutor
+WELCOME_MESSAGE = "Hello! I'm your Python Tutor. I'm here to help you learn Python programming step-by-step. Ask me anything about Python, and I'll guide you through it."
+
 class Query(BaseModel):
     message: str
     api_key: str = ""
@@ -76,15 +127,23 @@ async def ask_ai(query: Query):
     if not key:
         raise HTTPException(status_code=400, detail="API Key is Required.")
 
+    # Adding the welcome message to the chat history if it's the first message
+    if not chat_history:
+        chat_history.append({"role": "ai", "message": WELCOME_MESSAGE})
+
     try:
         genai.configure(api_key=key)
         model = genai.GenerativeModel("gemini-pro")
-        response = model.generate_content(query.message)
+        
+        # Construct a custom prompt with Python tutor context
+        tutor_prompt = f"Your Python Tutor says: {query.message} \n\n Please explain this concept to a beginner and provide examples where applicable."
+        response = model.generate_content(tutor_prompt)
 
         # Add query and response to chat history
         chat_history.append({"role": "user", "message": query.message})
         chat_history.append({"role": "ai", "message": response.text})
 
         return {"reply": response.text, "chat_history": chat_history}
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
