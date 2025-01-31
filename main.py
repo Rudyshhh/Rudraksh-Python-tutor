@@ -14,6 +14,16 @@ class Query(BaseModel):
     message: str
     api_key: str = ""
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # You can specify the exact domains you want to allow
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods like GET, POST, OPTIONS, etc.
+    allow_headers=["*"],  # Allow all headers
+)
+
 
 @app.post("/ask")
 async def ask_ai(query: Query):
